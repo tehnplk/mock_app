@@ -1,4 +1,5 @@
 import sys
+
 from PyQt6.QtWidgets import QDialog, QApplication
 
 from About_ui import About_ui
@@ -29,6 +30,7 @@ class About(QDialog, About_ui):
             self.move(x, y)
 
 if __name__ == "__main__":
+    print("Running About dialog as standalone application")
     app = QApplication(sys.argv)
     window = About()
     window.show()

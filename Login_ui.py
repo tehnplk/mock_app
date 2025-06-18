@@ -1,4 +1,5 @@
 import sys
+
 from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
@@ -9,6 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QFont
 from PyQt6.QtWebEngineWidgets import QWebEngineView
+
 from config_auth import AUTH_CONFIG
 
 

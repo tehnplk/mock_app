@@ -1,4 +1,5 @@
 import sys
+
 from PyQt6.QtWidgets import QVBoxLayout, QWidget, QLabel, QTableView, QHBoxLayout, QPushButton, QApplication
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from PyQt6.QtCore import Qt

@@ -1,4 +1,5 @@
 import sys
+
 from PyQt6.QtWidgets import QMainWindow, QMdiSubWindow, QTextEdit, QApplication
 from PyQt6.QtGui import QAction
 

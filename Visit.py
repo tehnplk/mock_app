@@ -1,4 +1,5 @@
 import sys
+
 from PyQt6.QtWidgets import QWidget, QMessageBox, QApplication
 
 from Visit_ui import Visit_ui

@@ -1,12 +1,13 @@
 import sys
 import json
+from urllib.parse import urlparse, parse_qs
+
 import requests
 from PyQt6.QtWidgets import QWidget, QApplication, QMessageBox
 from PyQt6.QtCore import pyqtSignal, QTimer, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from urllib.parse import urlparse, parse_qs
-from config_auth import AUTH_CONFIG
 
+from config_auth import AUTH_CONFIG
 from Login_ui import Login_ui
 
 
