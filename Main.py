@@ -1,7 +1,9 @@
 import sys
+import os
 
 from PyQt6.QtWidgets import QMainWindow, QMdiSubWindow, QTextEdit, QApplication
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QShortcut, QKeySequence, QIcon
+from PyQt6.QtCore import QTimer
 
 from Main_ui import Main_ui
 from About import About
@@ -17,13 +19,14 @@ class Main(QMainWindow, Main_ui):
         self.setupUi(self)
         print("Main hash_cid:", hash_cid)
 
+        # Set custom application icon
+        self.set_application_icon()
+
         # Track open windows
         self.open_windows = {}
         # Store current user information
         self.current_username = username
-        self.current_hash_cid = hash_cid
-
-        # Set window title with user info if provided
+        self.current_hash_cid = hash_cid# Set window title with user info if provided
         if username and hash_cid:
             self.setWindowTitle(
                 f"Hospital Management System - User: {username} ({hash_cid})"
@@ -32,7 +35,9 @@ class Main(QMainWindow, Main_ui):
             self.setWindowTitle(f"Hospital Management System - User: {username}")
         elif hash_cid:
             self.setWindowTitle(f"Hospital Management System - User: {hash_cid}")
-
+          # Set up auto-quit timer for 15 seconds
+        self.setup_auto_quit_timer()
+        
         # Connect About action
         self.about_action.triggered.connect(self.show_about)
         # Connect toolbar actions
@@ -41,6 +46,60 @@ class Main(QMainWindow, Main_ui):
         self.patient_action.triggered.connect(self.show_patient)
         self.visit_action.triggered.connect(self.show_visit)
         self.appoint_action.triggered.connect(self.show_appoint)
+        
+        # Add keyboard shortcut to cancel auto-quit timer (Ctrl+K)
+        self.cancel_timer_shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        self.cancel_timer_shortcut.activated.connect(self.cancel_auto_quit)
+
+    def set_application_icon(self):
+        """
+        Set custom application icon with Finding Data theme.
+        """
+        try:
+            # Get the directory where the script is located
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            icon_path = os.path.join(script_dir, "app_icon.png")
+            
+            if os.path.exists(icon_path):
+                # Set window icon using the custom icon
+                self.setWindowIcon(QIcon(icon_path))
+                # Also set application icon for taskbar
+                QApplication.instance().setWindowIcon(QIcon(icon_path))
+                print(f"Application icon set from: {icon_path}")
+            else:
+                # Fallback: create icon from text if file doesn't exist
+                print("Icon file not found, using fallback text icon")
+                self.setWindowIcon(self.create_fallback_icon())
+                QApplication.instance().setWindowIcon(self.create_fallback_icon())
+        except Exception as e:
+            print(f"Error setting application icon: {e}")
+            # Use fallback icon
+            self.setWindowIcon(self.create_fallback_icon())
+
+    def create_fallback_icon(self):
+        """
+        Create a fallback icon using text/emoji if icon file is not available.
+        """
+        from PyQt6.QtGui import QPixmap, QPainter, QFont, QColor
+        from PyQt6.QtCore import Qt
+        
+        size = 32
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        font = QFont("Segoe UI Emoji", size - 8)
+        font.setBold(True)
+        painter.setFont(font)
+        painter.setPen(QColor("#2980b9"))  # Blue color
+        
+        # Use magnifying glass emoji as fallback
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "🔍")
+        painter.end()
+        
+        return QIcon(pixmap)
 
     def set_user(self, username):
         """
@@ -55,6 +114,58 @@ class Main(QMainWindow, Main_ui):
         Get the current logged-in username.
         """
         return self.current_username
+
+    def setup_auto_quit_timer(self):
+        """
+        Set up a timer to automatically quit the application after 15 seconds.
+        """
+        self.quit_countdown = 15  # 15 seconds countdown
+        
+        # Main timer for quitting the application
+        self.quit_timer = QTimer()
+        self.quit_timer.setSingleShot(True)  # Timer runs only once
+        self.quit_timer.timeout.connect(self.auto_quit_application)
+        self.quit_timer.start(15000)  # 15 seconds = 15000 milliseconds
+        
+        # Countdown timer for updating status bar every second
+        self.countdown_timer = QTimer()
+        self.countdown_timer.timeout.connect(self.update_countdown_display)
+        self.countdown_timer.start(1000)  # Update every second
+        
+        print("Auto-quit timer started: Application will close in 15 seconds")
+        self.update_countdown_display()  # Show initial countdown
+
+    def update_countdown_display(self):
+        """
+        Update the status bar with countdown information.
+        """
+        if self.quit_countdown > 0:
+            self.statusbar.showMessage(f"⏰ Auto-close in {self.quit_countdown}s | Press Ctrl+K to cancel")
+            self.quit_countdown -= 1
+        else:
+            self.statusbar.showMessage("Closing application...")
+
+    def auto_quit_application(self):
+        """
+        Automatically quit the application.
+        """
+        print("Auto-quit timer expired: Closing application...")
+        self.countdown_timer.stop()  # Stop the countdown timer
+        self.statusbar.showMessage("Application closed automatically")
+        self.close()
+        QApplication.quit()
+
+    def cancel_auto_quit(self):
+        """
+        Cancel the auto-quit timer if user wants to continue using the application.
+        """
+        if hasattr(self, 'quit_timer') and self.quit_timer.isActive():
+            self.quit_timer.stop()
+            self.countdown_timer.stop()
+            self.statusbar.showMessage("Auto-quit timer cancelled - Application will remain open")
+            print("Auto-quit timer cancelled by user")
+            return True
+        return False
 
     def show_about(self):
         """

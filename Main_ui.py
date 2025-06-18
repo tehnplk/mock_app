@@ -1,13 +1,38 @@
 import sys
 
 from PyQt6.QtWidgets import QVBoxLayout, QWidget, QLabel, QMenuBar, QStatusBar, QMdiArea, QApplication, QToolBar, QMainWindow
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtGui import QAction, QIcon, QPixmap, QPainter, QFont
 from PyQt6.QtCore import Qt
 
 class Main_ui(object):
     """
     UI class for Main.
     """
+    
+    def create_icon_from_text(self, text, size=32, color="#2d3436"):
+        """Create an icon from Unicode text symbol"""
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        font = QFont()
+        font.setFamily("Segoe UI Emoji")  # Use emoji font
+        font.setPixelSize(size - 8)
+        font.setBold(True)
+        painter.setFont(font)
+        
+        # Set color
+        from PyQt6.QtGui import QColor
+        painter.setPen(QColor(color))
+        
+        # Draw text centered
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, text)
+        painter.end()
+        
+        return QIcon(pixmap)
+    
     def setupUi(self, Main_ui):
         """
         Set up the user interface.
@@ -19,12 +44,38 @@ class Main_ui(object):
         
         # Create menu bar
         self.menubar = QMenuBar(Main_ui)
-        Main_ui.setMenuBar(self.menubar)
-
-        # Create toolbar
+        Main_ui.setMenuBar(self.menubar)        # Create toolbar
         self.toolbar = QToolBar("Main Toolbar", Main_ui)
         self.toolbar.setMovable(False)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                spacing: 3px;
+                padding: 5px;
+            }
+            QToolBar QToolButton {
+                background-color: transparent;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                padding: 8px;
+                margin: 2px;
+                min-width: 60px;
+            }
+            QToolBar QToolButton:hover {
+                background-color: #e9ecef;
+                border: 1px solid #ced4da;
+            }
+            QToolBar QToolButton:pressed {
+                background-color: #dee2e6;
+            }
+            QToolBar::separator {
+                background-color: #ced4da;
+                width: 1px;
+                margin: 5px;
+            }
+        """)
         Main_ui.addToolBar(self.toolbar)
 
         # Create File menu
@@ -32,28 +83,31 @@ class Main_ui(object):
         self.edit_menu = self.menubar.addMenu("Edit")
         self.view_menu = self.menubar.addMenu("View")
         self.window_menu = self.menubar.addMenu("Window")
-        self.help_menu = self.menubar.addMenu("Help")
-        
-        # Create actions for toolbar and menus
+        self.help_menu = self.menubar.addMenu("Help")        # Create actions for toolbar and menus
         self.house_action = QAction("House", Main_ui)
         self.house_action.setStatusTip("Go to house page")
         self.house_action.setShortcut("Ctrl+H")
+        self.house_action.setIcon(self.create_icon_from_text("🏠", 24, "#00b894"))
         
         self.person_action = QAction("Person", Main_ui)
         self.person_action.setStatusTip("Manage person information")
         self.person_action.setShortcut("Ctrl+P")
+        self.person_action.setIcon(self.create_icon_from_text("👤", 24, "#0984e3"))
         
         self.patient_action = QAction("Patient", Main_ui)
         self.patient_action.setStatusTip("Manage patient records")
         self.patient_action.setShortcut("Ctrl+T")
+        self.patient_action.setIcon(self.create_icon_from_text("🏥", 24, "#e17055"))
         
         self.visit_action = QAction("Visit", Main_ui)
         self.visit_action.setStatusTip("Manage patient visits")
         self.visit_action.setShortcut("Ctrl+V")
+        self.visit_action.setIcon(self.create_icon_from_text("📋", 24, "#fdcb6e"))
         
         self.appoint_action = QAction("Appoint", Main_ui)
         self.appoint_action.setStatusTip("Manage appointments")
         self.appoint_action.setShortcut("Ctrl+A")
+        self.appoint_action.setIcon(self.create_icon_from_text("📅", 24, "#a29bfe"))
         
         # Add actions to File menu
         self.file_menu.addAction(self.house_action)
@@ -69,23 +123,24 @@ class Main_ui(object):
         self.toolbar.addAction(self.patient_action)
         self.toolbar.addAction(self.visit_action)
         self.toolbar.addAction(self.appoint_action)
-        self.toolbar.addSeparator()
-        
-        # Create View toolbar actions
+        self.toolbar.addSeparator()        # Create View toolbar actions
         self.cascade_toolbar_action = QAction("Cascade", Main_ui)
         self.cascade_toolbar_action.setStatusTip("Cascade all windows")
+        self.cascade_toolbar_action.setIcon(self.create_icon_from_text("🗂️", 24, "#636e72"))
         
         self.tile_toolbar_action = QAction("Tile", Main_ui)
         self.tile_toolbar_action.setStatusTip("Tile all windows")
+        self.tile_toolbar_action.setIcon(self.create_icon_from_text("⚏", 24, "#636e72"))
         
         # Add view actions to toolbar
         self.toolbar.addAction(self.cascade_toolbar_action)
         self.toolbar.addAction(self.tile_toolbar_action)
-        
-        # Create About action
+        self.toolbar.addSeparator()        # Create About action
         self.about_action = QAction("About", Main_ui)
         self.about_action.setStatusTip("Show information about this application")
+        self.about_action.setIcon(self.create_icon_from_text("ℹ️", 24, "#74b9ff"))
         self.help_menu.addAction(self.about_action)
+        self.toolbar.addAction(self.about_action)  # Add to toolbar as well
         
         # Create MDI area as central widget
         self.mdi_area = QMdiArea(Main_ui)

@@ -1,9 +1,11 @@
 import sys
 import json
+import os
 from urllib.parse import urlparse, parse_qs
 
 import requests
 from PyQt6.QtWidgets import QWidget, QApplication, QMessageBox
+from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal, QTimer, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 
@@ -18,11 +20,14 @@ class Login(QWidget, Login_ui):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        
+        # Set application icon
+        self.set_application_icon()
 
         # Fixed username for dummy login
         self.username = "doctor001"
         # Store reference to main window
-        self.main_window = None  # Store authentication data
+        self.main_window = None# Store authentication data
         self.auth_code = None
         self.hash_cid = None
 
@@ -40,6 +45,56 @@ class Login(QWidget, Login_ui):
             self.on_page_loaded
         )        # Load initial OAuth URL
         self.load_initial_url()
+
+    def set_application_icon(self):
+        """
+        Set custom application icon with Finding Data theme.
+        """
+        try:
+            # Get the directory where the script is located
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            icon_path = os.path.join(script_dir, "app_icon.png")
+            
+            if os.path.exists(icon_path):
+                # Set window icon using the custom icon
+                self.setWindowIcon(QIcon(icon_path))
+                # Also set application icon for taskbar
+                QApplication.instance().setWindowIcon(QIcon(icon_path))
+                print(f"Login window icon set from: {icon_path}")
+            else:
+                # Fallback: create icon from text if file doesn't exist
+                print("Icon file not found, using fallback text icon for login")
+                self.setWindowIcon(self.create_fallback_icon())
+                QApplication.instance().setWindowIcon(self.create_fallback_icon())
+        except Exception as e:
+            print(f"Error setting login window icon: {e}")
+            # Use fallback icon
+            self.setWindowIcon(self.create_fallback_icon())
+
+    def create_fallback_icon(self):
+        """
+        Create a fallback icon using text/emoji if icon file is not available.
+        """
+        from PyQt6.QtGui import QPixmap, QPainter, QFont, QColor
+        from PyQt6.QtCore import Qt
+        
+        size = 32
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        font = QFont("Segoe UI Emoji", size - 8)
+        font.setBold(True)
+        painter.setFont(font)
+        painter.setPen(QColor("#2980b9"))  # Blue color
+        
+        # Use magnifying glass emoji as fallback
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "🔍")
+        painter.end()
+        
+        return QIcon(pixmap)
 
     def load_initial_url(self):
         """Load the initial OAuth URL"""
@@ -64,37 +119,7 @@ class Login(QWidget, Login_ui):
         settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
 
-        # Inject CSS to make content responsive
-        css_injection = """
-        (function() {
-            var meta = document.createElement('meta');
-            meta.name = 'viewport';
-            meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-            document.getElementsByTagName('head')[0].appendChild(meta);
-            
-            // Add CSS to make content fit better
-            var style = document.createElement('style');
-            style.textContent = `
-                body { 
-                    margin: 0 !important; 
-                    padding: 10px !important; 
-                    box-sizing: border-box !important;
-                    overflow-x: hidden !important;
-                }
-                * { 
-                    box-sizing: border-box !important; 
-                }
-                .container, .main-content, .content {
-                    max-width: 100% !important;
-                    width: 100% !important;
-                }
-            `;
-            document.head.appendChild(style);
-        })();
-        """
-
-        # Execute the CSS injection when page loads
-        page.loadFinished.connect(lambda: page.runJavaScript(css_injection))
+        
 
     def adjust_zoom_to_fit(self):
         """Adjust zoom level to fit content better"""
