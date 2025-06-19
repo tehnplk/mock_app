@@ -228,11 +228,11 @@ class Login(QWidget, Login_ui):
         self.label_progress_login_status.setStyleSheet(f"""
             QLabel {{
                 color: {style_color}; 
-                font-size: 20px; 
+                font-size: 14px; 
                 margin: 20px; 
                 padding: 25px; 
                 font-weight: bold; 
-                line-height: 1.8;
+                line-height: 1.6;
                 text-align: center;
                 background-color: #f8f9fa;
                 border: 2px solid {border_color};
