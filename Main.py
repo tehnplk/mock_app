@@ -1,7 +1,7 @@
 import sys
 import os
 
-from PyQt6.QtWidgets import QMainWindow, QMdiSubWindow, QTextEdit, QApplication
+from PyQt6.QtWidgets import QMainWindow, QMdiSubWindow, QTextEdit, QApplication, QDialog, QDialog
 from PyQt6.QtGui import QAction, QShortcut, QKeySequence, QIcon
 from PyQt6.QtCore import QTimer
 
@@ -11,6 +11,8 @@ from House import House
 from Patient import Patient
 from Person import Person
 from Visit import Visit
+from Query import Query
+from HisConSetting import HisConSetting
 
 
 class Main(QMainWindow, Main_ui):
@@ -39,13 +41,14 @@ class Main(QMainWindow, Main_ui):
         self.setup_auto_quit_timer(seconds=30)
         
         # Connect About action
-        self.about_action.triggered.connect(self.show_about)
-        # Connect toolbar actions
+        self.about_action.triggered.connect(self.show_about)        # Connect toolbar actions
         self.house_action.triggered.connect(self.show_house)
         self.person_action.triggered.connect(self.show_person)
         self.patient_action.triggered.connect(self.show_patient)
         self.visit_action.triggered.connect(self.show_visit)
         self.appoint_action.triggered.connect(self.show_appoint)
+        self.query_action.triggered.connect(self.show_query)
+        self.settings_action.triggered.connect(self.show_settings)
         
         # Add keyboard shortcut to cancel auto-quit timer (Ctrl+K)
         self.cancel_timer_shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
@@ -214,6 +217,24 @@ class Main(QMainWindow, Main_ui):
             "appoint", "Appointments", create_appoint_widget
         )
 
+    def show_query(self):
+        """
+        Show the Database Query tool.
+        """
+        self.show_window_single_instance("query", "Database Query Tool", Query)
+
+    def show_settings(self):
+        """
+        Show the HIS Database Connection Settings dialog.
+        """
+        settings_dialog = HisConSetting(self)
+        result = settings_dialog.exec()
+        
+        if result == QDialog.DialogCode.Accepted:
+            # Settings were saved, you might want to update connections or notify other components
+            self.statusbar.showMessage("Database settings updated successfully")
+            print("HIS Database settings were updated")
+
     def create_mdi_window(self, title, content):
         """
         Create a new MDI window with the specified title and content.
@@ -233,17 +254,29 @@ class Main(QMainWindow, Main_ui):
     def show_window_single_instance(self, window_key, title, create_widget_func):
         """
         Show a window with single instance prevention.
-        """
-        # Check if window is already open
+        """        # Check if window is already open
         if (
             window_key in self.open_windows
             and self.open_windows[window_key].isVisible()
         ):
             # Bring existing window to front and activate it
             existing_window = self.open_windows[window_key]
+            
+            # First set as active sub window in MDI area
             self.mdi_area.setActiveSubWindow(existing_window)
+            
+            # Bring window to front
             existing_window.raise_()
+            existing_window.show()  # Ensure it's visible
             existing_window.activateWindow()
+            
+            # Also set focus to the window
+            existing_window.setFocus()
+            
+            # Update status bar to show which window was activated
+            self.statusbar.showMessage(f"Activated existing {title} window")
+            
+            print(f"Activated existing {window_key} window")
             return
 
         # Create widget using the provided function
@@ -258,13 +291,9 @@ class Main(QMainWindow, Main_ui):
         self.open_windows[window_key] = sub_window
 
         # Connect window close event to clean up reference
-        sub_window.destroyed.connect(lambda: self.open_windows.pop(window_key, None))
-
-        # Add to MDI area
-        self.mdi_area.addSubWindow(sub_window)
-
-        # Resize to 90% of parent MDI area (for main windows)
-        if window_key in ["house", "person", "patient", "visit", "appoint"]:
+        sub_window.destroyed.connect(lambda: self.open_windows.pop(window_key, None))        # Add to MDI area
+        self.mdi_area.addSubWindow(sub_window)        # Resize to 90% of parent MDI area (for main windows)
+        if window_key in ["house", "person", "patient", "visit", "appoint", "query"]:
             mdi_size = self.mdi_area.size()
             window_width = int(mdi_size.width() * 0.9)
             window_height = int(mdi_size.height() * 0.9)
@@ -275,7 +304,19 @@ class Main(QMainWindow, Main_ui):
             y = (mdi_size.height() - window_height) // 2
             sub_window.move(x, y)
 
+        # Show and activate the new window
         sub_window.show()
+        
+        # Make sure the new window is active and on top
+        self.mdi_area.setActiveSubWindow(sub_window)
+        sub_window.raise_()
+        sub_window.activateWindow()
+        sub_window.setFocus()
+        
+        # Update status bar
+        self.statusbar.showMessage(f"Opened new {title} window")
+        
+        print(f"Created new {window_key} window")
 
 
 if __name__ == "__main__":

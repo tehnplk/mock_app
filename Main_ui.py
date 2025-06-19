@@ -83,7 +83,9 @@ class Main_ui(object):
         self.edit_menu = self.menubar.addMenu("Edit")
         self.view_menu = self.menubar.addMenu("View")
         self.window_menu = self.menubar.addMenu("Window")
-        self.help_menu = self.menubar.addMenu("Help")        # Create actions for toolbar and menus
+        self.help_menu = self.menubar.addMenu("Help")
+        
+        # Create actions for toolbar and menus
         self.house_action = QAction("House", Main_ui)
         self.house_action.setStatusTip("Go to house page")
         self.house_action.setShortcut("Ctrl+H")
@@ -109,13 +111,25 @@ class Main_ui(object):
         self.appoint_action.setShortcut("Ctrl+A")
         self.appoint_action.setIcon(self.create_icon_from_text("📅", 24, "#a29bfe"))
         
+        self.query_action = QAction("Query", Main_ui)
+        self.query_action.setStatusTip("Database query tool")
+        self.query_action.setShortcut("Ctrl+Q")
+        self.query_action.setIcon(self.create_icon_from_text("🔍", 24, "#6c5ce7"))
+        
+        self.settings_action = QAction("Settings", Main_ui)
+        self.settings_action.setStatusTip("HIS Database connection settings")
+        self.settings_action.setShortcut("Ctrl+S")
+        self.settings_action.setIcon(self.create_icon_from_text("⚙️", 24, "#34495e"))
+        
         # Add actions to File menu
         self.file_menu.addAction(self.house_action)
         self.file_menu.addAction(self.person_action)
         self.file_menu.addAction(self.patient_action)
         self.file_menu.addAction(self.visit_action)
         self.file_menu.addAction(self.appoint_action)
+        self.file_menu.addAction(self.query_action)
         self.file_menu.addSeparator()
+        self.file_menu.addAction(self.settings_action)
         
         # Add actions to toolbar
         self.toolbar.addAction(self.house_action)
@@ -123,7 +137,9 @@ class Main_ui(object):
         self.toolbar.addAction(self.patient_action)
         self.toolbar.addAction(self.visit_action)
         self.toolbar.addAction(self.appoint_action)
-        self.toolbar.addSeparator()        # Create View toolbar actions
+        self.toolbar.addAction(self.query_action)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.settings_action)# Create View toolbar actions
         self.cascade_toolbar_action = QAction("Cascade", Main_ui)
         self.cascade_toolbar_action.setStatusTip("Cascade all windows")
         self.cascade_toolbar_action.setIcon(self.create_icon_from_text("🗂️", 24, "#636e72"))
@@ -207,6 +223,8 @@ class Main_ui(object):
         self.patient_action.setText("Patient")
         self.visit_action.setText("Visit")
         self.appoint_action.setText("Appoint")
+        self.query_action.setText("Query")
+        self.settings_action.setText("Settings")
         self.cascade_toolbar_action.setText("Cascade")
         self.tile_toolbar_action.setText("Tile")
         self.cascade_action.setText("Cascade")
