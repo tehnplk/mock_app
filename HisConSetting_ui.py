@@ -36,30 +36,32 @@ class HisConSetting_ui(object):
         
         HisConSetting_ui.setWindowTitle("HIS Database Connection Settings")
         HisConSetting_ui.setModal(True)  # Make it modal
-        HisConSetting_ui.setFixedWidth(600)  # Set window width to 600px
-
-        # Main layout
+        HisConSetting_ui.setFixedWidth(600)  # Set window width to 600px        # Main layout
         main_layout = QVBoxLayout(HisConSetting_ui)
         main_layout.setSpacing(15)
-        main_layout.setContentsMargins(20, 20, 20, 20)        # Create connection form directly
-        self.create_connection_form(main_layout)  # Create connection test section
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Create connection form directly
+        self.create_connection_form(main_layout)
+        # Create connection test section
         self.create_test_section(main_layout)
         # Create button section
         self.create_button_section(main_layout)
 
     def create_connection_form(self, parent_layout):
-        """Create connection form directly without tabs"""
-        # System Selection group
+        """Create connection form directly without tabs"""        # System Selection group
         system_group = QGroupBox("System Selection")
         system_layout = QFormLayout(system_group)
-
+        
         # HIS Name selection
         self.his_name = QComboBox()
         self.his_name.addItems(["HOSXP", "JHCIS", "Other"])
-        self.his_name.setCurrentText("HOSXP")
+        self.his_name.setCurrentText("HOSXP")  # Default selection
         self.his_name.setStyleSheet(
             "QComboBox { padding: 8px; font-size: 12px; min-height: 20px; }"
-        )        # Database System selection
+        )
+        
+        # Database System selection
         self.db_system = QComboBox()
         self.db_system.addItems(
             [
@@ -71,11 +73,11 @@ class HisConSetting_ui(object):
         self.db_system.setCurrentText("MySQL")
         self.db_system.setStyleSheet(
             "QComboBox { padding: 8px; font-size: 12px; min-height: 20px; }"
-        )
-
-        # Add widgets to form layout for full width
+        )        # Add widgets to form layout for full width
         system_layout.addRow("HIS:", self.his_name)
-        system_layout.addRow("Database:", self.db_system)# Connection Settings group
+        system_layout.addRow("Database:", self.db_system)
+        
+        # Connection Settings group
         conn_group = QGroupBox("Connection Settings")
         conn_layout = QFormLayout(conn_group)
         
@@ -140,7 +142,9 @@ class HisConSetting_ui(object):
 
         self.ssl = QCheckBox("Use SSL/Secure Connection")
 
-        adv_layout.addRow("SSL:", self.ssl)        # Connect signals for dynamic updates
+        adv_layout.addRow("SSL:", self.ssl)
+        
+        # Connect signals for dynamic updates
         self.his_name.currentTextChanged.connect(self.on_his_name_changed)
         self.db_system.currentTextChanged.connect(self.on_db_system_changed)
         self.use_connection_string.toggled.connect(self.connection_string.setEnabled)
@@ -188,9 +192,7 @@ class HisConSetting_ui(object):
     def create_test_section(self, parent_layout):
         """Create connection test section"""
         test_group = QGroupBox("Connection Test")
-        test_layout = QVBoxLayout(test_group)
-
-        # Test button and status
+        test_layout = QVBoxLayout(test_group)        # Test button and status
         test_button_layout = QHBoxLayout()
 
         self.btn_test_connection = QPushButton("Test Connection")
@@ -215,40 +217,21 @@ class HisConSetting_ui(object):
 
         self.label_test_status = QLabel("Ready to test connection")
         self.label_test_status.setStyleSheet("color: #7f8c8d; font-style: italic;")
+        self.label_test_status.setWordWrap(True)  # Enable word wrapping for long messages
 
         test_button_layout.addWidget(self.btn_test_connection)
-        test_button_layout.addStretch()
+        test_button_layout.addSpacing(20)  # Add small fixed spacing instead of stretch
         test_button_layout.addWidget(self.label_test_status)
-
-        # Test results area
-        self.text_test_results = QTextEdit()
-        self.text_test_results.setMaximumHeight(80)
-        self.text_test_results.setReadOnly(True)
-        self.text_test_results.setPlaceholderText(
-            "Connection test results will appear here..."
-        )
-        self.text_test_results.setStyleSheet(
-            """
-            QTextEdit {
-                border: 1px solid #bdc3c7;
-                border-radius: 4px;
-                background-color: #f8f9fa;
-                font-family: monospace;
-            }
-        """
-        )
+        test_button_layout.addStretch()  # Move stretch to the end to push everything left
 
         test_layout.addLayout(test_button_layout)
-        test_layout.addWidget(self.text_test_results)
 
         parent_layout.addWidget(test_group)
 
     def create_button_section(self, parent_layout):
         """Create dialog buttons"""
-        button_layout = QHBoxLayout()
-
-        # Save button
-        self.btn_save = QPushButton("Save Settings")
+        button_layout = QHBoxLayout()        # Save button
+        self.btn_save = QPushButton("Save")
         self.btn_save.setStyleSheet(
             """
             QPushButton {
@@ -319,3 +302,12 @@ class HisConSetting_ui(object):
         button_layout.addWidget(self.btn_cancel)
 
         parent_layout.addLayout(button_layout)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    dialog = QDialog()
+    ui = HisConSetting_ui()
+    ui.setupUi(dialog)
+    dialog.setWindowIcon(QIcon("icon.png"))  # Set your icon path here
+    dialog.show()
+    sys.exit(app.exec())
